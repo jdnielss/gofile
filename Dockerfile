@@ -1,11 +1,11 @@
 # Stage 1: Build the Go application
-FROM golang:1.19-alpine AS builder
+FROM golang:latest AS builder
 
 # Set the working directory inside the builder container
 WORKDIR /app
 
 # Copy go.mod and go.sum files
-COPY go.mod go.sum ./
+COPY . .
 
 # Download dependencies
 RUN go mod download
