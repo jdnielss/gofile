@@ -1,0 +1,19 @@
+[unit-test]
+ok  	go-smoke	0.129s
+[smoke-test]
+✓	hello_world
+✓	endpoint1
+✓	endpoint2
+✓	endpoint3
+✓	endpoint4
+✓	endpoint5
+OK
+[quality-gate]
+⛔️ Quality Gate failed
+✅ new_reliability_rating: 1 GT 1 => OK
+✅ new_security_rating: 1 GT 1 => OK
+✅ new_maintainability_rating: 1 GT 1 => OK
+✅ bugs: 0 GT 1 => OK
+✅ code_smells: 0 GT 2 => OK
+✅ critical_violations: 0 GT 1 => OK
+⛔️ uncovered_lines: 22 GT 5 => ERROR
