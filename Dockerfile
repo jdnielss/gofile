@@ -1,29 +1,37 @@
-# Stage 1: Build the Go application
-FROM golang:latest AS builder
+# Use the official Golang image as a base image
+FROM golang:alpine AS builder
 
-# Set the working directory inside the builder container
+# Set the Current Working Directory inside the container
 WORKDIR /app
 
-# Copy go.mod and go.sum files
-COPY . .
+# Install necessary dependencies for CGO
+RUN apk add --no-cache gcc musl-dev
 
-# Download dependencies
+# Copy go mod and sum files
+COPY go.mod go.sum ./
+
+# Download all dependencies. Dependencies will be cached if the go.mod and go.sum files are not changed
 RUN go mod download
 
-# Copy the entire source code
+# Copy the source from the current directory to the Working Directory inside the container
 COPY . .
 
-# Build the Go application
-RUN go build -o myapp .
+# Enable CGO and build the Go app
+ENV CGO_ENABLED=1
+RUN go build -o main .
 
-# Stage 2: Create a smaller runtime image
+# Use a minimal image for the final container
 FROM alpine:latest
 
-# Set the working directory inside the runtime container
+# Install SQLite
+RUN apk --no-cache add sqlite
+
+# Set the Current Working Directory inside the container
 WORKDIR /app
 
-# Copy the binary from the builder container to the runtime container
-COPY --from=builder /app/myapp .
+# Copy the Pre-built binary file from the previous stage
+COPY --from=builder /app/main .
+COPY --from=builder /app/projects.db ./projects.db
 
 # Command to run the executable
-CMD ["./myapp"]
+CMD ["./main"]
