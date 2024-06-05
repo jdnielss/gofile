@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -180,21 +181,24 @@ func viewProjectHandler(w http.ResponseWriter, r *http.Request) {
 	var path string
 	err := db.QueryRow("SELECT path FROM projects WHERE name=?", projectName).Scan(&path)
 	if err != nil {
-		fmt.Println(err)
+		log.Printf("Error querying database for project %s: %v", projectName, err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	results, err := parseFile(path)
 	if err != nil {
-		fmt.Println(err)
+		log.Printf("Error parsing file %s: %v", path, err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	html := generateHTML(results)
 	w.Header().Set("Content-Type", "text/html")
-	w.Write([]byte(html))
+	_, err = w.Write([]byte(html))
+	if err != nil {
+		log.Printf("Error writing response: %v", err)
+	}
 }
 
 func viewResult(w http.ResponseWriter, r *http.Request) {
