@@ -181,15 +181,20 @@ func viewProjectHandler(w http.ResponseWriter, r *http.Request) {
 	var path string
 	err := db.QueryRow("SELECT path FROM projects WHERE name=?", projectName).Scan(&path)
 	if err != nil {
-		log.Printf("Error querying database for project %s: %v", projectName, err)
-		w.WriteHeader(http.StatusInternalServerError)
+		if err == sql.ErrNoRows {
+			log.Printf("No project found with name %s", projectName)
+			http.Error(w, "Project not found", http.StatusNotFound)
+		} else {
+			log.Printf("Error querying database for project %s: %v", projectName, err)
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+		}
 		return
 	}
 
 	results, err := parseFile(path)
 	if err != nil {
 		log.Printf("Error parsing file %s: %v", path, err)
-		w.WriteHeader(http.StatusInternalServerError)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
